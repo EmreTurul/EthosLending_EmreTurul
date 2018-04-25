@@ -6,30 +6,41 @@ namespace EthosLending_EmreTurul
 {
     class Program
     {
+        static double Amount = 0;
+        static double Interest = 0;
+        static double DownPayment = 0;
+        static double Term = 0;
 
-        //amount: 100000
-        //interest: 5.5%
-        //downpayment: 20000
-        //term: 30
+        static double MonthlyPayment = 0;
+        static double TotalInterest = 0;
+        static double TotalPayment = 0;
 
         static void Main(string[] args)
         {
 
-            double Amount = 0;
-            double Interest = 0;
-            double DownPayment = 0;
-            double Term = 0;
+            try
+            {
+                // reading input values
+                ReadInputVariables();
 
-            double MonthlyPayment = 0;
-            double TotalInterest = 0;
-            double TotalPayment = 0;
-
-            string inputText = "";
+                // Calculate the loan payment
+                CalculateLoan();
 
 
-            // reading input values
+                // Generate JSON
+                GenerateJSON();
+            }
+            catch(Exception exc)
+            {
+                Console.WriteLine(exc.Message);
+                Console.ReadKey();
+            }
 
-            inputText = Console.ReadLine();
+        }
+
+        static void ReadInputVariables(){
+
+            string inputText = Console.ReadLine();
 
             string AmountText = getDigitPart(InputType.Amount, inputText);
             Amount = convertToDouble(AmountText);
@@ -55,35 +66,33 @@ namespace EthosLending_EmreTurul
 
             Console.ReadLine();
 
+        }
 
-            // Calculate the loan payment
+        static void CalculateLoan(){
 
             double MonthlyInterestRate = Interest / (100 * 12);
             double NumberOfPayments = Term * 12;
 
 
-            // MonthlyPayment = Amount * (InterestRate / (1 - Math.Pow((1 + InterestRate), (-PaymentNumber))));
-
-            // MonthlyPayment = (Amount * MonthlyInterestRate) / (1 - (Math.Pow(1 + MonthlyInterestRate, Term)));
-
-            MonthlyPayment = (MonthlyInterestRate * (Amount-DownPayment)) / (1 - Math.Pow(1 + MonthlyInterestRate, NumberOfPayments * -1));
-
+            MonthlyPayment = (MonthlyInterestRate * (Amount - DownPayment)) / (1 - Math.Pow(1 + MonthlyInterestRate, NumberOfPayments * -1));
 
             TotalPayment = MonthlyPayment * NumberOfPayments;
 
-            TotalInterest = TotalPayment - Amount- DownPayment;
+            TotalInterest = TotalPayment - (Amount - DownPayment);
+        }
 
+        static void GenerateJSON(){
 
-            // Generate JSON
-
-            LoanDTO loanDTO = new LoanDTO() { MonthlyPayment = Math.Round( MonthlyPayment ,2), TotalPayment = Math.Round(TotalPayment,2) , TotalInterest = Math.Round(TotalInterest,2) };
+            LoanDTO loanDTO = new LoanDTO() { MonthlyPayment = Math.Round(MonthlyPayment, 2), TotalPayment = Math.Round(TotalPayment, 2), TotalInterest = Math.Round(TotalInterest, 2) };
 
             var output = JsonConvert.SerializeObject(loanDTO);
 
             Console.WriteLine(output);
             Console.ReadKey();
-
         }
+
+
+
 
 
 
@@ -129,44 +138,8 @@ namespace EthosLending_EmreTurul
     }
 
 
-    class LoanDTO {
 
-        [JsonProperty(PropertyName = "monthly payment")]
-        public double MonthlyPayment { get; set; }
-
-        [JsonProperty(PropertyName = "total interest")]
-        public double TotalInterest { get; set; }
-
-        [JsonProperty(PropertyName = "total payment")]
-        public double TotalPayment { get; set; }
-    }
 
 
 }
 
-
-//double principal;     // total mortgage loan
-//double interestPerc;  // percent annual interest
-//double interestRate;  // monthly interest rate
-//double years;         // years to pay
-//double paymentNum;    // number of months to pay
-//double paymentVal;    // value of monthly payment
-//String fstr;
-      //this.label4.Text = "";
-      //principal = double.Parse(this.textBox1.Text);
-      //interestPerc = double.Parse(this.textBox2.Text);
-      //interestRate = interestPerc / (100 * 12);
-      //years = double.Parse(this.textBox3.Text);
-      //paymentNum = years * 12;
-
-
-      //paymentVal = principal * (interestRate / (1 - Math.Pow((1 + interestRate), (-paymentNum))));
-      //fstr = String.Format("Principal Loan: {0:C}\n", principal);
-      //this.label4.Text += fstr;
-      //this.label4.Text += "Interest (%)  : " + interestPerc + '\n';
-      //this.label4.Text += "Years to pay  : " + years + '\n';
-      //this.label4.Text += "Months to pay : " + paymentNum + '\n';
-      //fstr = String.Format("Monthly pay   : {0:C}\n", paymentVal);
-      //this.label4.Text += fstr;
-      //fstr = String.Format("Total pay     : {0:C}\n", paymentVal * paymentNum);
-      //this.label4.Text += fstr;
